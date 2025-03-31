@@ -22,7 +22,7 @@
         // 🛠 Funzione principale
         async function caricaOfferte() {
             try {
-                const response = await fetch(`${CLOUDFLARE_WORKER_URL}?key=${API_KEY}&channel=${CHANNEL_NAME}`);
+                const response = await fetch(`${CLOUDFLARE_WORKER_URL}?key=${API_KEY}&channel=${CHANNEL_ID}`);
                 
                 if (!response.ok) throw new Error(`Errore ${response.status}`);
                 
