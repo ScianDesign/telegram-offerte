@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offerte Auto Andrea Scian</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🚗 Offerte Auto in Tempo Reale</h1>
+        <div id="posts-container"></div>
+        <div id="error-message"></div>
+    </div>
+
+    <script>
+        // ⚙️ CONFIGURAZIONE OBBLIGATORIA ⚙️
+        const CLOUDFLARE_WORKER_URL = 'https://tuo-worker.cloudflareworkers.dev';
+        const API_KEY = 'TUA_CHIAVE_SEGRETA';
+        const CHANNEL_NAME = '@AndreaScian_BrokerAstauto';
+
+        // 🛠 Funzione principale
+        async function caricaOfferte() {
+            try {
+                const response = await fetch(`${CLOUDFLARE_WORKER_URL}?key=${API_KEY}&channel=${CHANNEL_NAME}`);
+                
+                if (!response.ok) throw new Error(`Errore ${response.status}`);
+                
+                const data = await response.json();
+                mostraPost(data.result);
+            } catch (error) {
+                document.getElementById('error-message').innerHTML = `
+                    <div class="errore">
+                        ❌ Errore nel caricamento: ${error.message}<br>
+                        Ricarica la pagina tra qualche minuto
+                    </div>
+                `;
+            }
+        }
+
+        // 🖼 Mostra i post con immagini
+        function mostraPost(posts) {
+            const container = document.getElementById('posts-container');
+            container.innerHTML = '';
+
+            posts.forEach(post => {
+                const dataOra = new Date(post.message.date * 1000).toLocaleString('it-IT');
+                const testo = post.message.text || post.message.caption || '';
+                const immagine = post.message.photo ? 
+                    `<img src="https://api.telegram.org/file/bot${post.message.photo[0].file_id}" 
+                          alt="Offerta auto" 
+                          loading="lazy">` : '';
+
+                container.innerHTML += `
+                    <div class="post">
+                        <div class="data-offerta">📅 ${dataOra}</div>
+                        <div class="testo-offerta">${testo}</div>
+                        ${immagine}
+                    </div>
+                `;
+            });
+        }
+
+        // 🔄 Aggiornamento automatico ogni 5 minuti
+        caricaOfferte();
+        setInterval(caricaOfferte, 300000);
+    </script>
+</body>
+</html>
